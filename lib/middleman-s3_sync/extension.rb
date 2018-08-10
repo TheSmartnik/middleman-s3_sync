@@ -29,6 +29,7 @@ module Middleman
     option :error_document, nil, 'S3 custom error document path'
     option :content_types, {}, 'Custom content types'
     option :ignore_paths, [], 'Paths that should be ignored during sync, strings or regex are allowed'
+    option :threads_count, 8, 'Number of threads to use during update'
 
     expose_to_config :s3_sync_options, :default_caching_policy, :caching_policy
 

@@ -25,8 +25,6 @@ module Middleman
       attr_accessor :mm_resources
       attr_reader   :app
 
-      THREADS_COUNT = 8
-
       def sync()
         @app ||= ::Middleman::Application.new
 
@@ -151,25 +149,25 @@ module Middleman
       end
 
       def create_resources
-        Parallel.map(files_to_create, in_threads: THREADS_COUNT, &:create!)
+        Parallel.map(files_to_create, in_threads: s3_sync_options.threads_count, &:create!)
       end
 
       def update_resources
-        Parallel.map(files_to_update, in_threads: THREADS_COUNT, &:update!)
+        Parallel.map(files_to_update, in_threads: s3_sync_options.threads_count, &:update!)
       end
 
       def delete_resources
-        Parallel.map(files_to_delete, in_threads: THREADS_COUNT, &:destroy!)
+        Parallel.map(files_to_delete, in_threads: s3_sync_options.threads_count, &:destroy!)
       end
 
       def ignore_resources
-        Parallel.map(files_to_ignore, in_threads: THREADS_COUNT, &:ignore!)
+        Parallel.map(files_to_ignore, in_threads: s3_sync_options.threads_count, &:ignore!)
       end
 
       def work_to_be_done?
-        Parallel.each(mm_resources, in_threads: THREADS_COUNT, progress: "Processing sitemap") { |mm_resource| add_local_resource(mm_resource) }
+        Parallel.each(mm_resources, in_threads: s3_sync_options.threads_count, progress: "Processing sitemap") { |mm_resource| add_local_resource(mm_resource) }
 
-        Parallel.each(remote_only_paths, in_threads: THREADS_COUNT, progress: "Processing remote files") do |remote_path|
+        Parallel.each(remote_only_paths, in_threads: s3_sync_options.threads_count, progress: "Processing remote files") do |remote_path|
           s3_sync_resources[remote_path] ||= S3Sync::Resource.new(nil, remote_resource_for_path(remote_path)).tap(&:status)
         end
 
